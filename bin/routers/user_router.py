@@ -1,6 +1,8 @@
 from fastapi import FastAPI,APIRouter,Query,Depends
 from fastapi.exceptions import HTTPException
-from bin.requests.user_requests import NewUser,UserActivationRequest,UserLoginRequest,ForgetPWRequest
+from bin.middleware.user_middleware import Authorization
+from bin.requests.user_requests import NewUser,UserActivationRequest,UserLoginRequest,ForgetPWRequest,\
+                            InviteUser
 from bin.controllers.user_controller import userManager
 
 router = APIRouter(
@@ -20,6 +22,10 @@ def verify_otp(request: UserActivationRequest):
 def sign_in_user(request: UserLoginRequest):
     return userManager.sign_in(request)
 
+@router.get('/profile')
+def show_user_profile(authentication=Depends(Authorization())):
+    return userManager.get_user_profile(user_id=authentication.sub)
+
 @router.post('/forget-password')
 async def forget_passowrd(request: ForgetPWRequest):
     return await userManager.forget_pw(request)
@@ -27,3 +33,8 @@ async def forget_passowrd(request: ForgetPWRequest):
 @router.post('/set-new-password')
 def set_new_password(request: UserLoginRequest):
     return userManager.forget_pw(request)
+
+@router.post('/invite')
+async def set_new_password(request:InviteUser):
+    return await userManager.invite_user(request)
+

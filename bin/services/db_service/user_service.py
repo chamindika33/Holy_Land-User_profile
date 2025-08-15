@@ -5,7 +5,8 @@ from bin.models import pg_models
 from sqlalchemy.exc import SQLAlchemyError
 from bin.response.response_model import ErrorResponseModel
 from bin.services.hash_password import hash_password
-from datetime import datetime, timezone
+from bin.enum.admin_status import AdminStatus
+
 
 db: Session = next(db_connection())
 
@@ -19,7 +20,27 @@ async def create_new_user(request):
             email=request.email,
             phone_number=request.phone_number,
             email_verified=False,
-            role_id=request.role_id
+            role_id=request.role_id,
+            is_admin_approved=AdminStatus.PENDING.value
+
+        )
+        db.add(data)
+        db.commit()
+        db.refresh(data)
+        return data.user_id
+
+    except SQLAlchemyError as e:
+        db.rollback()
+        return ErrorResponseModel(str(e), 404)
+
+
+async def create_new_invite_user(request):
+    try:
+        data = pg_models.User(
+            password=hash_password(request.temporary_password),
+            email=request.email,
+            role_id=2,
+            is_admin_approved=AdminStatus.PENDING.value
 
         )
         db.add(data)
@@ -76,6 +97,20 @@ def validate_user(email):
             ).filter(
                 pg_models.User.email == email
             ).first()
+        return data
+
+    except SQLAlchemyError as e:
+        db.rollback()
+        return ErrorResponseModel(str(e), 404)
+
+def get_user_details(user_id):
+    try:
+        data = db.query(
+                pg_models.User
+            ).filter(
+                pg_models.User.user_id == user_id
+            ).first()
+
         return data
 
     except SQLAlchemyError as e:

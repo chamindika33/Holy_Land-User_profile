@@ -32,6 +32,17 @@ def send_public_acc_verification_email(contents):
 
     return send_e_mail(next(email()))
 
+def send_user_invitation_email(contents):
+    email = PasswordEmail(
+        subject='Holy Land Account Invitation',
+        salutation='Dear User',
+        paragraph='You have been invited Holy Land account registration.' 
+                  '. Please use the below Password to activate your account.',
+        recipient=contents['send_to'],
+        code=contents['password']
+    )
+
+    return send_e_mail(next(email()))
 
 def send_password_reset_email(contents):
     email = PasswordEmail(

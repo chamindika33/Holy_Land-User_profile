@@ -10,8 +10,8 @@ _password = os.getenv('REDIS_PASSWORD')
 redis_conn = get_redis_connection(
     host=_host,
     port=_port,
-    # username=_username,
-    # password=_password,
+    username=_username,
+    password=_password,
     decode_responses=True,
     db = 3
 

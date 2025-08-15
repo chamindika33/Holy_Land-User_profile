@@ -75,3 +75,14 @@ class UserLoginRequest(BaseModel):
 
         setattr(cls, 'method', method)
         return value
+
+class InviteUser(BaseModel):
+    email: EmailStr
+    temporary_password: str
+
+    @field_validator('email')
+    @classmethod
+    def validate_email(cls, value):
+        email_validation(value)
+        email_available(value)
+        return value
